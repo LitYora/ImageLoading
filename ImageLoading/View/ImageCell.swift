@@ -10,6 +10,7 @@ import UIKit
 class ImageCell: UICollectionViewCell {
     static let identifier = "ImageCell"
     
+    
     @IBOutlet weak var imageView: UIImageView!
     
     

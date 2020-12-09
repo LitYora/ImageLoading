@@ -46,12 +46,18 @@ class NetworkService {
     }
     
     //MARK:- Fetch Images
-    func fetchImages(amount: Int, completion: @escaping (Result<[ImageInfo], SessionError>) -> Void) {
+    func fetchImages(amount: Int, request: String?, completion: @escaping (Result<[ImageInfo], SessionError>) -> Void) {
         var urlComps = baseUrlComponent
+        if request == "" {
         urlComps.queryItems? += [
             URLQueryItem(name: "per_page", value: "\(amount)"),
-            URLQueryItem(name: "q", value: "\(true)")
-        ]
+            URLQueryItem(name: "editors_choice", value: "\(true)")
+        ] } else {
+            urlComps.queryItems? += [
+                URLQueryItem(name: "per_page", value: "\(amount)"),
+                URLQueryItem(name: "q", value: request)
+            ]
+        }
         guard let url = urlComps.url else {
             completion(.failure(.invalidUrl))
             return

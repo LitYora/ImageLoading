@@ -7,7 +7,13 @@
 
 import UIKit
 
-class ViewController: UIViewController {
+class ViewController: UIViewController, UISearchResultsUpdating {
+    func updateSearchResults(for searchController: UISearchController) {
+        let text = searchController.searchBar.text
+        guard let request = text?.replacingOccurrences(of: " ", with: "+") else { return  }
+        loadImages(request: request)
+        
+    }
 
 @IBOutlet weak var collectionView: UICollectionView!
 
@@ -17,21 +23,30 @@ class ViewController: UIViewController {
     private let spacing: CGFloat = 5
     private let numberOfItemsPerRow: CGFloat = 3
     
+    let searchController = UISearchController(searchResultsController: nil)
+    
     //MARK:- Lifecycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
         configure()
-        loadImages()
+        loadImages(request: "")
     }
     
     private func configure() {
         collectionView.delegate = self
         collectionView.dataSource = self
+        
+        searchController.searchResultsUpdater = self
+        searchController.obscuresBackgroundDuringPresentation = false
+        searchController.searchBar.placeholder = "Search Photos"
+        navigationItem.searchController = searchController
+        definesPresentationContext = true
+
     }
     
-    private func loadImages() {
-        NetworkService.shared.fetchImages(amount: 60) { (result) in
+    private func loadImages(request: String) {
+        NetworkService.shared.fetchImages(amount: 60, request: request) { (result) in
             switch result {
             case let .failure(error):
                 print(error)
@@ -68,8 +83,6 @@ extension ViewController: UICollectionViewDelegate, UICollectionViewDataSource {
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ImageCell.identifier, for: indexPath) as? ImageCell else {
             fatalError("Invalid Cell Kind")
         }
-//        cell.layer.borderColor = UIColor.black.cgColor
-//        cell.layer.borderWidth = 2
 
         loadImage(for: cell, at: indexPath.row)
         
@@ -100,7 +113,7 @@ extension ViewController: UICollectionViewDelegateFlowLayout {
         return UIEdgeInsets(top: spacing,
                      left: spacing,
                      bottom: spacing,
-                     right: spacing
+                     right: spacing //* 8 + 3
         )
     }
     
@@ -112,6 +125,3 @@ extension ViewController: UICollectionViewDelegateFlowLayout {
         return spacing
     }
 }
-
-
-

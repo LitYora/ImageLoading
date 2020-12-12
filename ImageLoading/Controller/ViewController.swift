@@ -75,6 +75,18 @@ class ViewController: UIViewController, UISearchResultsUpdating {
             }
         }
     }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "ShowSecondVC" {
+            guard let secondVC = segue.destination as? DetailViewController,
+                  let imageInfo = sender as? ImageInfo
+            else {
+                fatalError("Inccorect data passed when showing detailVC")
+            }
+            secondVC.imageInfo = imageInfo
+                  
+        }
+    }
 
 }
 
@@ -129,6 +141,10 @@ extension ViewController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
         return spacing
     }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        performSegue(withIdentifier: "ShowSecondVC", sender: imagesInfo[indexPath.row])
+    }
 }
 
 //MARK:- SearchBar
@@ -143,3 +159,6 @@ extension ViewController : UISearchBarDelegate {
         loadImages(request: request)
     }
 }
+
+//MARK:- PerformSegue
+

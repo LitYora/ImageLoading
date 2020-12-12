@@ -13,4 +13,6 @@ struct ImageInfo: Decodable {
     var webformatURL: URL?
     var likes: Int
     var comments: Int
+    var user: String
+    var views: Int
 }

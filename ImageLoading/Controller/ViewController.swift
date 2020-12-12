@@ -42,6 +42,8 @@ class ViewController: UIViewController, UISearchResultsUpdating {
         searchController.searchBar.placeholder = "Search Photos"
         navigationItem.searchController = searchController
         definesPresentationContext = true
+//        searchController.searchBar.backgroundColor = .systemPink
+//        navigationController?.navigationBar.backgroundColor = .systemPink
 
     }
     
@@ -54,7 +56,7 @@ class ViewController: UIViewController, UISearchResultsUpdating {
             case let .success(imagesInfo):
                 self.imagesInfo = imagesInfo
                 self.images = Array(repeating: nil, count: imagesInfo.count)
-                self.collectionView.reloadData()
+                self.collectionView.reloadSections(IndexSet(arrayLiteral: 0))
             }
         }
     }
@@ -66,8 +68,11 @@ class ViewController: UIViewController, UISearchResultsUpdating {
             return
         }
         NetworkService.shared.loadImage(from: info.webformatURL) { (image) in
-            self.images[index] = image
-            cell.configure(with: self.images[index])
+            if index < self.images.count {
+                self.images[index] = image
+                cell.configure(with: self.images[index])
+
+            }
         }
     }
 
@@ -123,5 +128,18 @@ extension ViewController: UICollectionViewDelegateFlowLayout {
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
         return spacing
+    }
+}
+
+//MARK:- SearchBar
+extension ViewController : UISearchBarDelegate {
+    func searchBarShouldEndEditing(_ searchBar: UISearchBar) -> Bool {
+        return true
+    }
+    func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
+        guard let request = searchBar.text, request.count >= 3 else {
+            return
+        }
+        loadImages(request: request)
     }
 }

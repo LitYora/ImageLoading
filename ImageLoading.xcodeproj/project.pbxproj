@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		9D4193A0258528E100A2BD14 /* DetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D41939F258528E100A2BD14 /* DetailViewController.swift */; };
+		9D55E37525A6511700F9DB10 /* CacheManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D55E37425A6511700F9DB10 /* CacheManager.swift */; };
 		9DCEA645257E44240077A3F1 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DCEA644257E44240077A3F1 /* AppDelegate.swift */; };
 		9DCEA647257E44240077A3F1 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DCEA646257E44240077A3F1 /* SceneDelegate.swift */; };
 		9DCEA649257E44240077A3F1 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DCEA648257E44240077A3F1 /* ViewController.swift */; };
@@ -23,6 +24,7 @@
 
 /* Begin PBXFileReference section */
 		9D41939F258528E100A2BD14 /* DetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailViewController.swift; sourceTree = "<group>"; };
+		9D55E37425A6511700F9DB10 /* CacheManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CacheManager.swift; sourceTree = "<group>"; };
 		9DCEA641257E44240077A3F1 /* ImageLoading.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ImageLoading.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9DCEA644257E44240077A3F1 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		9DCEA646257E44240077A3F1 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -129,6 +131,7 @@
 			isa = PBXGroup;
 			children = (
 				9DCEA65F257E487A0077A3F1 /* NetworkService.swift */,
+				9D55E37425A6511700F9DB10 /* CacheManager.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -209,6 +212,7 @@
 				9DCEA645257E44240077A3F1 /* AppDelegate.swift in Sources */,
 				9DCEA660257E487A0077A3F1 /* NetworkService.swift in Sources */,
 				9DCEA647257E44240077A3F1 /* SceneDelegate.swift in Sources */,
+				9D55E37525A6511700F9DB10 /* CacheManager.swift in Sources */,
 				9DCEA66D257F8C5D0077A3F1 /* ImageCell.swift in Sources */,
 				9DCEA667257ED9160077A3F1 /* ServerResponce.swift in Sources */,
 				9DCEA66A257ED97D0077A3F1 /* ServerError.swift in Sources */,

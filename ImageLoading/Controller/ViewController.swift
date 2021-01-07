@@ -8,12 +8,6 @@
 import UIKit
 
 class ViewController: UIViewController, UISearchResultsUpdating {
-    func updateSearchResults(for searchController: UISearchController) {
-        let text = searchController.searchBar.text
-        guard let request = text?.replacingOccurrences(of: " ", with: "+") else { return  }
-        loadImages(request: request)
-        
-    }
 
 @IBOutlet weak var collectionView: UICollectionView!
 
@@ -47,6 +41,13 @@ class ViewController: UIViewController, UISearchResultsUpdating {
 
     }
     
+    func updateSearchResults(for searchController: UISearchController) {
+        let text = searchController.searchBar.text
+        guard let request = text?.replacingOccurrences(of: " ", with: "+") else { return  }
+        loadImages(request: request)
+        
+    }
+
     private func loadImages(request: String) {
         NetworkService.shared.fetchImages(amount: 60, request: request) { (result) in
             switch result {
@@ -61,15 +62,23 @@ class ViewController: UIViewController, UISearchResultsUpdating {
         }
     }
     
+    private func getCachedImages() {
+        CacheManager.shared.getCachedImages { (images) in
+            self.images = images
+            self.collectionView.reloadData()
+        }
+    }
+    
     private func loadImage(for cell: ImageCell, at index: Int) {
-        let info = imagesInfo[index]
         if let image = images[index] {
             cell.configure(with: image)
             return
         }
+        let info = imagesInfo[index]
         NetworkService.shared.loadImage(from: info.webformatURL) { (image) in
             if index < self.images.count {
                 self.images[index] = image
+                CacheManager.shared.cacheImage(image, with: info.id)
                 cell.configure(with: self.images[index])
 
             }

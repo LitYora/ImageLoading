@@ -12,51 +12,56 @@ class CacheManager {
     
     static let shared = CacheManager()
     
-    //private let imagesLimit = 100
     private let sizeLimit = 100000000
     private let fileManager = FileManager.default
     
     
     //MARK:- Cache Image
+    ///completion is executed on the background thread
     func cacheImage(_ image: UIImage?, with id: Int, completion: ((Bool) -> Void)? = nil) {
-        guard let image = image,
-              let data = image.pngData()
-        else {
-            completion?(false)
-            return
+        DispatchQueue.global(qos: .utility).async { [self] in
+            guard let image = image,
+                  let data = image.pngData()
+            else {
+                completion?(false)
+                return
+            }
+            
+            let imageUrl = getCachesDirectory().appendingPathComponent("\(id)")
+            
+            guard !fileManager.fileExists(atPath: imageUrl.path) else {
+                completion?(true)
+                return
+            }
+            
+            var savedPaths = getCachedImagesPaths()
+            //while imagesLimit <= savedPaths.count {
+            while sizeLimit <= directorySize(url: getCachesDirectory()) {
+               _ = deleteImage(path: savedPaths.first!)
+                savedPaths.remove(at: savedPaths.startIndex)
+            }
+            
+            do{
+                try data.write(to: imageUrl)
+                print("Image was saved to: \(imageUrl)")
+                completion?(true)
+            }
+            catch {
+                print(error)
+                completion?(false)
+            }
         }
-        
-        let imageUrl = getCachesDirectory().appendingPathComponent("\(id)")
-        
-        guard !fileManager.fileExists(atPath: imageUrl.path) else {
-            completion?(true)
-            return
-        }
-        
-        var savedPaths = getCachedImagesPaths()
-        //while imagesLimit <= savedPaths.count {
-        while sizeLimit <= directorySize(url: getCachesDirectory()) {
-           _ = deleteImage(path: savedPaths.first!)
-            savedPaths.remove(at: savedPaths.startIndex)
-        }
-        
-        do{
-            try data.write(to: imageUrl)
-            print("Image was saved to: \(imageUrl)")
-            completion?(true)
-        }
-        catch {
-            print(error)
-            completion?(false)
-        }
-        
     }
     
     //MARK:- Get Image
-    func getImage(with id: Int, completion: (UIImage?) -> Void) {
+    func getImage(with id: Int, completion: @escaping (UIImage?) -> Void) {
         let imageUrl = getCachesDirectory().appendingPathComponent("\(id)")
-        let image = getImage(from: imageUrl.path)
-        completion(image)
+        DispatchQueue.global(qos: .userInteractive).async {
+            let image = self.getImage(from: imageUrl.path)
+            DispatchQueue.main.async {
+                completion(image)
+            }
+        }
     }
     
     func getImage(from path: String) -> UIImage? {
@@ -67,15 +72,20 @@ class CacheManager {
         return nil
     }
     
-    func getCachedImages(completion: ([UIImage]) -> Void) {
-        var images = [UIImage]()
-        let imagePaths = getCachedImagesPaths()
-        for path in imagePaths {
-            if let image = getImage(from: path) {
-                images.append(image)
+    func getCachedImages(completion: @escaping ([UIImage]) -> Void) {
+        DispatchQueue.global().async { [self] in
+            var images = [UIImage]()
+            let imagePaths = getCachedImagesPaths()
+            for path in imagePaths {
+                if let image = getImage(from: path) {
+                    images.append(image)
+                }
+            }
+            DispatchQueue.main.async {
+                completion(images)
             }
         }
-        completion(images)
+        
     }
     
     //MARK:- Delete Image

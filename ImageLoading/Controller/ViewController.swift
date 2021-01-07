@@ -19,32 +19,46 @@ class ViewController: UIViewController, UISearchResultsUpdating {
     
     let searchController = UISearchController(searchResultsController: nil)
     
+    let noResultLabel = UILabel(frame: CGRect(x: 0, y: 0, width: 200, height: 21))
+
+    
     //MARK:- Lifecycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
         configure()
         loadImages(request: "")
+        getCachedImages()
     }
     
     private func configure() {
         collectionView.delegate = self
         collectionView.dataSource = self
-        
+
         searchController.searchResultsUpdater = self
         searchController.obscuresBackgroundDuringPresentation = false
         searchController.searchBar.placeholder = "Search Photos"
         navigationItem.searchController = searchController
         definesPresentationContext = true
-//        searchController.searchBar.backgroundColor = .systemPink
-//        navigationController?.navigationBar.backgroundColor = .systemPink
 
+        noResultLabel.isHidden = true
+        noResultLabel.font = UIFont.preferredFont(forTextStyle: .footnote)
+        noResultLabel.textColor = .gray
+        noResultLabel.center = CGPoint(x: view.bounds.width / 2, y: view.bounds.height / 2)
+        noResultLabel.textAlignment = .center
+        noResultLabel.text = "No Matches"
+        self.view.addSubview(noResultLabel)
+        
     }
     
     func updateSearchResults(for searchController: UISearchController) {
+        noResultLabel.isHidden = true
         let text = searchController.searchBar.text
-        guard let request = text?.replacingOccurrences(of: " ", with: "+") else { return  }
+        guard let request = text?.replacingOccurrences(of: " ", with: "+"), (request.count >= 3 || request.count == 0)  else { return }
         loadImages(request: request)
+        if request == "" {
+            noResultLabel.isHidden = true
+        }
         
     }
 
@@ -57,19 +71,28 @@ class ViewController: UIViewController, UISearchResultsUpdating {
             case let .success(imagesInfo):
                 self.imagesInfo = imagesInfo
                 self.images = Array(repeating: nil, count: imagesInfo.count)
-                self.collectionView.reloadSections(IndexSet(arrayLiteral: 0))
+                self.updateUI()
+                if self.images.isEmpty {
+                    self.noResultLabel.isHidden = false
+                } else { self.noResultLabel.isHidden = true}
             }
         }
     }
     
+    private func updateUI() {
+        self.collectionView.reloadSections(IndexSet(arrayLiteral: 0))
+    }
+    
     private func getCachedImages() {
+        noResultLabel.isHidden = true
         CacheManager.shared.getCachedImages { (images) in
             self.images = images
-            self.collectionView.reloadData()
+            self.updateUI()
         }
     }
     
     private func loadImage(for cell: ImageCell, at index: Int) {
+        cell.activityIndicator.startAnimating()
         if let image = images[index] {
             cell.configure(with: image)
             return
@@ -80,7 +103,6 @@ class ViewController: UIViewController, UISearchResultsUpdating {
                 self.images[index] = image
                 CacheManager.shared.cacheImage(image, with: info.id)
                 cell.configure(with: self.images[index])
-
             }
         }
     }
@@ -93,7 +115,6 @@ class ViewController: UIViewController, UISearchResultsUpdating {
                 fatalError("Inccorect data passed when showing detailVC")
             }
             secondVC.imageInfo = imageInfo
-                  
         }
     }
 
@@ -109,7 +130,7 @@ extension ViewController: UICollectionViewDelegate, UICollectionViewDataSource {
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ImageCell.identifier, for: indexPath) as? ImageCell else {
             fatalError("Invalid Cell Kind")
         }
-
+        cell.activityIndicator.startAnimating()
         loadImage(for: cell, at: indexPath.row)
         
         return cell
@@ -130,7 +151,6 @@ extension ViewController: UICollectionViewDelegateFlowLayout {
         let cellWidth = rawWidth / numberOfItemsPerRow
         
         return CGSize(width: cellWidth, height: cellWidth)
-        
     }
     
 
@@ -154,20 +174,26 @@ extension ViewController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         performSegue(withIdentifier: "ShowSecondVC", sender: imagesInfo[indexPath.row])
     }
+    
+    func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+
+        cell.alpha = 0
+        UIView.animate(withDuration: 0.3, delay: 0.01 * Double(indexPath.row), animations: {
+              cell.alpha = 1
+        })
+    }
 }
 
 //MARK:- SearchBar
-extension ViewController : UISearchBarDelegate {
-    func searchBarShouldEndEditing(_ searchBar: UISearchBar) -> Bool {
-        return true
-    }
-    func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
-        guard let request = searchBar.text, request.count >= 3 else {
-            return
-        }
-        loadImages(request: request)
-    }
-}
-
-//MARK:- PerformSegue
+//extension ViewController : UISearchBarDelegate {
+//    func searchBarShouldEndEditing(_ searchBar: UISearchBar) -> Bool {
+//        return true
+//    }
+//    func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
+//        guard let request = searchBar.text, request.count >= 3 else {
+//            return
+//        }
+//        loadImages(request: request)
+//    }
+//}
 

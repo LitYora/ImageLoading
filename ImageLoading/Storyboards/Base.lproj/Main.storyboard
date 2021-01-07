@@ -37,6 +37,11 @@
                                                 <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="axd-sp-LsJ">
                                                     <rect key="frame" x="1" y="1" width="126" height="126"/>
                                                 </imageView>
+                                                <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" hidesWhenStopped="YES" style="medium" translatesAutoresizingMaskIntoConstraints="NO" id="Rra-CI-SVB">
+                                                    <rect key="frame" x="54" y="54" width="20" height="20"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                                    <color key="color" systemColor="systemPinkColor"/>
+                                                </activityIndicatorView>
                                             </subviews>
                                             <constraints>
                                                 <constraint firstItem="axd-sp-LsJ" firstAttribute="top" secondItem="NtV-l2-RcK" secondAttribute="top" constant="1" id="239-Ye-i2V"/>
@@ -47,6 +52,7 @@
                                         </collectionViewCellContentView>
                                         <size key="customSize" width="128" height="128"/>
                                         <connections>
+                                            <outlet property="activityIndicator" destination="Rra-CI-SVB" id="TwO-2g-oFf"/>
                                             <outlet property="imageView" destination="axd-sp-LsJ" id="Qy4-61-GYo"/>
                                         </connections>
                                     </collectionViewCell>
@@ -70,7 +76,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="607" y="94"/>
+            <point key="canvasLocation" x="605.79710144927537" y="93.75"/>
         </scene>
         <!--Detail View Controller-->
         <scene sceneID="akE-V6-XLm">

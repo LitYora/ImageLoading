@@ -40,7 +40,7 @@ class DetailViewController: UIViewController {
     
     private func loadImage() {
 
-        NetworkService.shared.loadImage(from: imageInfo.webformatURL) { (image) in
+        NetworkService.shared.loadImage(from: imageInfo.webformatURL, imageInfo: imageInfo) { (image) in
             self.detailImageView.image = image
             
         }

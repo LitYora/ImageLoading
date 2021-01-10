@@ -72,17 +72,19 @@ class CacheManager {
         return nil
     }
     
-    func getCachedImages(completion: @escaping ([UIImage]) -> Void) {
+    func getCachedImages(completion: @escaping ([UIImage], [String]) -> Void) {
         DispatchQueue.global().async { [self] in
             var images = [UIImage]()
+            var imagesId = [String]()
             let imagePaths = getCachedImagesPaths()
             for path in imagePaths {
                 if let image = getImage(from: path) {
                     images.append(image)
+                    imagesId.append(path.components(separatedBy: "/").last ?? "0")
                 }
             }
             DispatchQueue.main.async {
-                completion(images)
+                completion(images, imagesId)
             }
         }
         
@@ -124,6 +126,25 @@ class CacheManager {
         }
         
         return url
+    }
+    
+    func comparingCacheAndURL(info: ImageInfo, completion: @escaping (UIImage) -> Void) {
+        DispatchQueue.global().async { [self] in
+            var image = UIImage()
+            for fileURL in getCachedImagesPaths() {
+                if ("\(info.id)") == fileURL.split(separator: "/").last {
+                    image = getImage(from: ("\(fileURL)"))!
+                    DispatchQueue.main.async {
+                        completion(image)
+                    }
+                }
+            }
+      //      completion(nil)
+        }
+    }
+    
+    func getURLById(){
+        
     }
     
     //MARK:- Size Counter

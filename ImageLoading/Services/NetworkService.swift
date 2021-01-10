@@ -26,28 +26,35 @@ class NetworkService {
 
 
     //MARK:-LoadImage
-    func loadImage(from url: URL?, completion: @escaping(UIImage?) -> Void) {
+    func loadImage(from url: URL?, imageInfo: ImageInfo, completion: @escaping(UIImage?) -> Void) {
         guard let url = url else {
             completion(nil)
             return
         }
-    
-        URLSession.shared.dataTask(with: url) { (data, _, _) in
-            DispatchQueue.main.async {
-                if let data = data {
-                    completion(UIImage(data: data))
-                } else {
-                    completion(nil)
-                }
-            }
         
-        }.resume()
-    
+        CacheManager.shared.comparingCacheAndURL(info: imageInfo) { (image) in
+            completion(image)
+            return
+                
+                URLSession.shared.dataTask(with: url) { (data, _, _) in
+                    DispatchQueue.main.async {
+                        if let data = data {
+                            //cache
+                            completion(UIImage(data: data))
+                        } else {
+                            completion(nil)
+                        }
+                    }
+                }.resume()
+            
+        }
+        
     }
     
     //MARK:- Fetch Images
     func fetchImages(amount: Int, request: String?, completion: @escaping (Result<[ImageInfo], SessionError>) -> Void) {
         var urlComps = baseUrlComponent
+        ////Если пустой запрос, то выводим editor's choice
         if request == "" {
         urlComps.queryItems? += [
             URLQueryItem(name: "per_page", value: "\(amount)"),

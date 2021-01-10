@@ -13,6 +13,7 @@ class ViewController: UIViewController, UISearchResultsUpdating {
 
     private var images: [UIImage?] = []
     private var imagesInfo = [ImageInfo]()
+    private var imagesId = [String]()
     
     private let spacing: CGFloat = 5
     private let numberOfItemsPerRow: CGFloat = 3
@@ -27,8 +28,8 @@ class ViewController: UIViewController, UISearchResultsUpdating {
     override func viewDidLoad() {
         super.viewDidLoad()
         configure()
-        loadImages(request: "")
         getCachedImages()
+        //loadImages(request: "")
     }
     
     private func configure() {
@@ -63,6 +64,8 @@ class ViewController: UIViewController, UISearchResultsUpdating {
     }
 
     private func loadImages(request: String) {
+        images.removeAll()
+        self.updateUI()
         NetworkService.shared.fetchImages(amount: 60, request: request) { (result) in
             switch result {
             case let .failure(error):
@@ -85,8 +88,9 @@ class ViewController: UIViewController, UISearchResultsUpdating {
     
     private func getCachedImages() {
         noResultLabel.isHidden = true
-        CacheManager.shared.getCachedImages { (images) in
+        CacheManager.shared.getCachedImages { (images, imagesId) in
             self.images = images
+            self.imagesId = imagesId
             self.updateUI()
         }
     }
@@ -98,7 +102,17 @@ class ViewController: UIViewController, UISearchResultsUpdating {
             return
         }
         let info = imagesInfo[index]
-        NetworkService.shared.loadImage(from: info.webformatURL) { (image) in
+//        var cachedImage = UIImage()
+//        CacheManager.shared.comparingCacheAndURL(index: index, info: info) { (image) in
+//            cachedImage = image
+//            cell.configure(with: cachedImage)
+//            return
+//        }
+//        if cachedImage.imageAsset != nil {
+//            cell.configure(with: cachedImage)
+//            return
+//        }
+        NetworkService.shared.loadImage(from: info.webformatURL, imageInfo: imagesInfo[index]) { (image) in
             if index < self.images.count {
                 self.images[index] = image
                 CacheManager.shared.cacheImage(image, with: info.id)
@@ -123,7 +137,7 @@ class ViewController: UIViewController, UISearchResultsUpdating {
 //MARK:- Data Source & Delegate
 extension ViewController: UICollectionViewDelegate, UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return imagesInfo.count
+        return images.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -134,6 +148,9 @@ extension ViewController: UICollectionViewDelegate, UICollectionViewDataSource {
         loadImage(for: cell, at: indexPath.row)
         
         return cell
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {        performSegue(withIdentifier: "ShowSecondVC", sender: imagesInfo[indexPath.row])
     }
 }
 
@@ -169,10 +186,6 @@ extension ViewController: UICollectionViewDelegateFlowLayout {
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
         return spacing
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        performSegue(withIdentifier: "ShowSecondVC", sender: imagesInfo[indexPath.row])
     }
     
     func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
